@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import { AuthProvider } from "@/components/auth-provider";
+import { PwaBootstrap } from "@/components/pwa-bootstrap";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
@@ -24,6 +25,14 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "PIM — Personal Information Management",
   description: "A minimal, print-perfect home for the details that matter.",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {
@@ -45,6 +54,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
+            <PwaBootstrap />
             <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
           </AuthProvider>
         </ThemeProvider>

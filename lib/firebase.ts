@@ -1,6 +1,10 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
 import { GoogleAuthProvider, getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
+import {
+  enableMultiTabIndexedDbPersistence,
+  getFirestore,
+  type Firestore,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,3 +23,37 @@ export const db: Firestore = getFirestore(firebaseApp);
 
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({ prompt: "select_account" });
+
+let firestorePersistenceStarted = false;
+
+export function ensureFirestorePersistence(): Promise<void> {
+  if (firestorePersistenceStarted || typeof window === "undefined") {
+    return Promise.resolve();
+  }
+
+  firestorePersistenceStarted = true;
+
+  return enableMultiTabIndexedDbPersistence(db).catch((error) => {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: string }).code === "failed-precondition"
+    ) {
+      return;
+    }
+
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: string }).code === "unimplemented"
+    ) {
+      return;
+    }
+
+    console.warn("Firestore persistence could not be enabled", error);
+  });
+}
+
+void ensureFirestorePersistence();
